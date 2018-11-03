@@ -98,7 +98,9 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     //Nécessaire pour afficher la barre de progression dans l'icône de la barre des tâches
+#ifdef _WIN32
     taskButton = new QWinTaskbarButton(this);
+#endif
     //button->setOverlayIcon(QIcon(":/loading.png"));
 }
 
@@ -193,11 +195,13 @@ void MainWindow::startProcess()
             ui->progressBar->show();
             ui->globalProgressBar->show();
             ui->downloadingLabel->show();
+#ifdef _WIN32
             taskButton->setWindow(this->windowHandle());
             taskProgressBar = taskButton->progress();
             connect(ui->progressBar, SIGNAL(valueChanged(int)), taskProgressBar, SLOT(setValue(int)));
             taskProgressBar->setMaximum(100);
             taskProgressBar->show();
+#endif
             ui->progressBar->setValue(0);
         }
         arguments.clear();
@@ -304,8 +308,10 @@ void MainWindow::processFinished(int exitCode)
                 ui->audioFormatLineEdit->setEnabled(true);
             ui->stopPushButton->hide();
             ui->downloadPushButton->show();
+#ifdef _WIN32
             if(mode == Downloading)
                 taskProgressBar->hide();
+#endif
             nbVideosToDownload = 0;
             ui->downloadingLabel->setText("Terminé !");
             mode = Nothing;
@@ -318,14 +324,15 @@ void MainWindow::processFinished(int exitCode)
         ui->progressBar->hide();
         ui->globalProgressBar->hide();
         ui->globalProgressBar->setMaximum(0);
-        taskProgressBar->hide();
         writeOutput("Le programme s'est arrêté suite à une erreur.");
         setWidgetsEnabled(true);
         if(ui->subsCheckBox->isChecked())
             ui->subsLineEdit->setEnabled(true);
         ui->stopPushButton->hide();
         ui->downloadPushButton->show();
+#ifdef _WIN32
         taskProgressBar->hide();
+#endif
         nbVideosToDownload = 0;
         ui->downloadingLabel->setText("Une erreur est survenue.");
         mode = Nothing;
@@ -522,6 +529,7 @@ void MainWindow::getFileNames(QString& msg)
             {
                 nbVideosToDownload++;
                 ui->globalProgressBar->setMaximum(nbVideosToDownload);
+#ifdef _WIN32
                 if(nbVideosToDownload == 2)
                 {
                     disconnect(ui->progressBar, SIGNAL(valueChanged(int)), taskProgressBar, SLOT(setValue(int)));
@@ -531,6 +539,7 @@ void MainWindow::getFileNames(QString& msg)
                 {
                     taskProgressBar->setMaximum(nbVideosToDownload);
                 }
+#endif
                 if(ui->audioOnlyCheckBox->isChecked())
                 {
                     split[i].remove(split[i].right(split[i].length()-split[i].lastIndexOf('.')));

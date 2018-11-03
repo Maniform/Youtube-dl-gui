@@ -10,8 +10,10 @@
 #include <QFile>
 #include <QTextStream>
 #include <QMessageBox>
+#ifdef _WIN32
 #include <QWinTaskbarButton>
 #include <QWinTaskbarProgress>
+#endif
 
 namespace Ui {
 class MainWindow;
@@ -68,8 +70,10 @@ private:
     QStringList arguments;
 
     //Instances nécessaires pour l'affichage de la barre de progression dans l'icône de la barre des tâches
+#ifdef _WIN32
     QWinTaskbarButton *taskButton;
     QWinTaskbarProgress *taskProgressBar;
+#endif
 
     void writeOutput(QString text);
     void showMessageBox(QString, QString);

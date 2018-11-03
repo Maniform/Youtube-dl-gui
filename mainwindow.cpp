@@ -3,13 +3,13 @@
 
 //#include <QDebug>
 
-#define MAX_TEXT_SIZE 100000
+#define MAX_TEXT_SIZE 1000000
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     nbVideosToDownload(0),
-    programPath(QDir::currentPath()),
+    programPath(QDir::currentPath()+"/"),
     mode(Nothing),
     gettingFileName(false),
     process(this)
@@ -90,12 +90,27 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Vérification de l'existence de 'youtube-dl'
     QDir dir;
+#ifdef _WIN32
     if(!dir.exists("youtube-dl"))
     {
-        writeOutput("Attention : le fichier youtube-dl est inexistant dans le dossier du programme.");
+        showMessageBox("Attention !","Le fichier youtube-dl est inexistant dans le dossier du programme.");
         ui->downloadingLabel->setText("Attention : le fichier youtube-dl est inexistant dans le dossier du programme.");
         ui->downloadingLabel->show();
     }
+#else
+    if(!dir.exists(QDir::homePath() + "/.local/bin/youtube-dl"))
+    {
+        showMessageBox("Attention !","youtube-dl ne semple pas être installé sur cette machine.\nPour avoir la dernière version :\nsudo apt install python-pip\npip install youtube-dl");
+        ui->downloadingLabel->setText("Attention : le programme youtube-dl ne semble pas être installé.");
+        ui->downloadingLabel->show();
+    }
+    if(!dir.exists("/usr/bin/ffmpeg"))
+    {
+        showMessageBox("Attention !","ffmpeg ne semble pas être installé sur cette machine.\nPour l'installer :\nsudo apt install ffmpeg");
+        ui->downloadingLabel->setText(ui->downloadingLabel->text().append("\nAttention : le programme ffmpeg ne semble pas être installé."));
+        ui->downloadingLabel->show();
+    }
+#endif
 
     //Nécessaire pour afficher la barre de progression dans l'icône de la barre des tâches
 #ifdef _WIN32
@@ -129,17 +144,25 @@ void MainWindow::writeOutput(QString text)
     {
         outputText = outputText.right(MAX_TEXT_SIZE);
         ui->outputPlainTextEdit->clear();
+#ifdef _WIN32
         if(mode == Downloading)
             ui->outputPlainTextEdit->appendHtml(outputText);
         else
             ui->outputPlainTextEdit->appendPlainText(outputText);
+#else
+        ui->outputPlainTextEdit->appendPlainText(outputText);
+#endif
     }
     else
     {
+#ifdef _WIN32
         if(mode == Downloading)
             ui->outputPlainTextEdit->appendHtml(text);
         else
             ui->outputPlainTextEdit->appendPlainText(text);
+#else
+        ui->outputPlainTextEdit->appendPlainText(text);
+#endif
     }
 }
 
@@ -210,8 +233,10 @@ void MainWindow::startProcess()
             writeOutput("Le changement de dossier a échoué.");
         }
         arguments << ui->lienLineEdit->text();
+#ifdef _WIN32
         if(ui->titleCorrectorCheckBox->isChecked())
             arguments << "--restrict-filenames";
+#endif
         if(gettingFileName)
         {
             arguments << "--get-filename" << "--get-id";
@@ -257,7 +282,11 @@ void MainWindow::startProcess()
         ui->videoCodeSpinBox->setEnabled(false);
         ui->downloadPushButton->hide();
         ui->stopPushButton->show();
-        process.start(programPath + "/youtube-dl",arguments);
+#ifdef _WIN32
+        process.start(programPath + "youtube-dl",arguments);
+#else
+        process.start("youtube-dl",arguments);
+#endif
     }
     else
     {
@@ -393,7 +422,11 @@ void MainWindow::listSubtitles()
         ui->videoCodeSpinBox->setEnabled(false);
         ui->audioFormatLineEdit->setEnabled(false);
         mode = ShowingSubtitles;
-        process.start(programPath + "/youtube-dl",arguments);
+#ifdef _WIN32
+        process.start(programPath + "youtube-dl",arguments);
+#else
+        process.start("youtube-dl",arguments);
+#endif
     }
     else
     {
@@ -421,7 +454,11 @@ void MainWindow::listVideoFormats()
         ui->videoCodeSpinBox->setEnabled(false);
         ui->audioFormatLineEdit->setEnabled(false);
         mode = ShowingVideoFormats;
-        process.start(programPath + "/youtube-dl",arguments);
+#ifdef _WIN32
+        process.start(programPath + "youtube-dl",arguments);
+#else
+        process.start("youtube-dl",arguments);
+#endif
     }
     else
         showMessageBox("Attention !","Le lien Youtube est vide.");
@@ -553,6 +590,7 @@ void MainWindow::getFileNames(QString& msg)
                 {
                     split[i].remove("-" + id.last());
                     split[i].replace('_',' ');
+                    split[i].replace("  "," ");
                 }
                 correctedTitle << split[i];
             }

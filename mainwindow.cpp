@@ -1,10 +1,13 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QDate>
 
 //#include <QDebug>
 
-#define MAX_TEXT_SIZE 1000000
 
+#define MAX_TEXT_SIZE 1000000
+//sudo apt install python-pip
+//pip install youtube-dl
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -633,4 +636,20 @@ void MainWindow::showMessageBox(QString title, QString text)
         msg.setText(text);
         msg.exec();
     }
+}
+
+void MainWindow::on_actionA_Propos_de_Youtube_dl_triggered()
+{
+    const std::string Compilator_Version = std::to_string(__GNUC__) + "." + std::to_string(__GNUC_MINOR__) + "." + std::to_string(__GNUC_PATCHLEVEL__);
+    const QString CPP_Info = QString::fromStdString(std::to_string(__cplusplus));
+
+    const QString QCompilator_Version = "Compiler Version :" + QString::fromStdString(Compilator_Version);
+    //QString sDate = QDateTime::currentDateTime().toString("dddd dd MMMM yyyy hh:mm:ss.zzz");
+    const QString sDate = QDateTime::currentDateTime().toString("dd/MM/yyyy");
+    QMessageBox msgBox;
+
+    msgBox.setText("<b>Build informations</b>");
+    const QString Message = QString("Build by: ") + QCompilator_Version + "\n" + "C++ version: " + CPP_Info + "\n" + "Build date :" + sDate;
+    msgBox.setInformativeText(Message);
+    msgBox.exec();
 }

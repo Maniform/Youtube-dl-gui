@@ -52,6 +52,9 @@ public slots:
     void playlistChecked(int checked);
     void logChecked(int checked);
 
+private slots:
+    void on_actionA_Propos_de_Youtube_dl_triggered();
+
 private:
     Ui::MainWindow *ui;
     int nbVideosToDownload; //Nombre de vidéos à télécharger

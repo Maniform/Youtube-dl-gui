@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QDate>
+#include <QProcess>
 
 //#include <QDebug>
 
@@ -103,10 +104,36 @@ MainWindow::MainWindow(QWidget *parent) :
 #else
     if(!dir.exists(QDir::homePath() + "/.local/bin/youtube-dl"))
     {
-        showMessageBox("Attention !","youtube-dl ne semple pas être installé sur cette machine.\nPour avoir la dernière version :\nsudo apt install python-pip\npip install youtube-dl");
+        //showMessageBox("Attention !","youtube-dl ne semple pas être installé sur cette machine.\nPour avoir la dernière version :\nsudo apt install python-pip\npip install youtube-dl");
+
+        QMessageBox msgBox;
+        msgBox.setText("Attention !\nyoutube-dl ne semple pas être installé sur cette machine.\nPour avoir la dernière version :\nsudo apt install python-pip\npip install youtube-dl");
+        msgBox.setInformativeText("Ou voudriez-vous qu'il soit intallé automatiquement ?");
+
+        msgBox.setStandardButtons(QMessageBox::Apply | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Apply);
+        QProcess process;
+        switch (msgBox.exec()) {
+          case QMessageBox::Apply:
+            //process.startDetached("apt install python-pip");//Ne fonctionne pas encore
+
+            showMessageBox("Attention !","L'installation automatique n'est pas encore fonctionnelle");
+
+            /* For debugging */
+            //QString stdout = process.readAllStandardOutput();
+            //QString stderr = process.readAllStandardError();
+              break;
+          case QMessageBox::Cancel:
+
+              break;
+          default:
+
+              break;
+        }
         ui->downloadingLabel->setText("Attention : le programme youtube-dl ne semble pas être installé.");
         ui->downloadingLabel->show();
     }
+
     if(!dir.exists("/usr/bin/ffmpeg"))
     {
         showMessageBox("Attention !","ffmpeg ne semble pas être installé sur cette machine.\nPour l'installer :\nsudo apt install ffmpeg");

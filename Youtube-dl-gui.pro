@@ -9,7 +9,7 @@ QT       += core gui
 win32:QT += winextras
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = Youtube-dl-gui
+TARGET = youtube-dl-gui
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use

@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QDate>
-#include <QProcess>
 
 //#include <QDebug>
 
@@ -310,6 +309,7 @@ void MainWindow::startProcess()
         setWidgetsEnabled(false);
         ui->subsLineEdit->setEnabled(false);
         ui->videoCodeSpinBox->setEnabled(false);
+        ui->audioFormatLineEdit->setEnabled(false);
         ui->downloadPushButton->hide();
         ui->stopPushButton->show();
 #ifdef _WIN32
@@ -337,6 +337,11 @@ void MainWindow::processFinished(int exitCode)
     {
         if(gettingFileName)
         {
+            if(nbVideosToDownload == 1)
+            {
+                ui->globalProgressBar->hide();
+                ui->downloadingLabel->setText("Téléchargement de : " + correctedTitle[0]);
+            }
             startProcess();
         }
         else
@@ -344,16 +349,7 @@ void MainWindow::processFinished(int exitCode)
             ui->progressBar->setValue(100);
             if(ui->titleCorrectorCheckBox->isChecked())
             {
-                for(int i = 0 ; i < title.length() ; i++)
-                {
-                    if(QFile::rename(QDir::currentPath() + "/" + title[i], correctedTitle[i]))
-                        writeOutput("Nom du fichier corrigé.");
-                    else
-                    {
-                        writeOutput("Erreur lors du renommage du fichier de sortie.");
-                        writeOutput(title[i].toUtf8() + " -> " + correctedTitle[i].toUtf8());
-                    }
-                }
+                correctFileName(correctedTitle.length()-1);
             }
             title.clear();
             correctedTitle.clear();
@@ -387,6 +383,10 @@ void MainWindow::processFinished(int exitCode)
         setWidgetsEnabled(true);
         if(ui->subsCheckBox->isChecked())
             ui->subsLineEdit->setEnabled(true);
+        if(ui->videoFormatCheckBox->isChecked())
+            ui->videoCodeSpinBox->setEnabled(true);
+        if(ui->audioOnlyCheckBox->isChecked())
+            ui->audioFormatLineEdit->setEnabled(true);
         ui->stopPushButton->hide();
         ui->downloadPushButton->show();
 #ifdef _WIN32
@@ -396,6 +396,8 @@ void MainWindow::processFinished(int exitCode)
         ui->downloadingLabel->setText("Une erreur est survenue.");
         mode = Nothing;
         QApplication::alert(this);
+        if(exitCode == 0)
+            QApplication::beep();
     }
 }
 
@@ -635,6 +637,10 @@ void MainWindow::changeActualDownloadingVideo(QString& msg)
     msg.remove("[download] Downloading video ");
     msg.remove('\n');
     QStringList l = msg.split(' ');
+    if(ui->titleCorrectorCheckBox->isChecked() && l[0].toInt() > 1)
+    {
+        correctFileName(l[0].toInt()-2);
+    }
     ui->globalProgressBar->setValue(l[0].toInt());
     ui->downloadingLabel->setText("Téléchargement de : " + correctedTitle[l[0].toInt()-1]);
     ui->progressBar->setValue(0);
@@ -678,5 +684,38 @@ void MainWindow::on_actionA_Propos_de_Youtube_dl_triggered()
     msgBox.setText("<b>Build informations</b>");
     const QString Message = QString("Build by: ") + QCompilator_Version + "\n" + "C++ version: " + CPP_Info + "\n" + "Build date :" + sDate;
     msgBox.setInformativeText(Message);
+    msgBox.setWindowIcon(this->windowIcon());
     msgBox.exec();
+}
+
+void MainWindow::correctFileName(int index)
+{
+    if(QFile::rename(QDir::currentPath() + "/" + title[index], correctedTitle[index]))
+        writeOutput("Nom du fichier corrigé.");
+    else
+    {
+        writeOutput("Erreur lors du renommage du fichier de sortie.");
+        writeOutput(title[index].toUtf8() + " -> " + correctedTitle[index].toUtf8());
+    }
+}
+
+void MainWindow::on_actionMettre_jour_youtube_dl_triggered()
+{
+    QStringList arg;
+    arg.append("-U");
+    QProgressDialog dial(this);
+    QProcess update(&dial);
+    dial.setLabelText("Mise à jour en cours... (Cette opération peut prendre quelques minutes)");
+    dial.setMinimum(0);
+    dial.setMaximum(0);
+    dial.setValue(-1);
+    dial.setCancelButtonText("Annuler");
+    connect(&dial, SIGNAL(canceled()), &update, SLOT(kill()));
+    connect(&update, SIGNAL(finished(int)), &dial, SLOT(done(int)));
+#ifdef _WIN32
+    update.start(programPath + "youtube-dl",arg);
+#else
+    update.startDetached("youtube-dl",arg);
+#endif
+    dial.exec();
 }

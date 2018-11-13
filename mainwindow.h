@@ -10,6 +10,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QMessageBox>
+#include <QProgressDialog>
 #ifdef _WIN32
 #include <QWinTaskbarButton>
 #include <QWinTaskbarProgress>
@@ -54,6 +55,7 @@ public slots:
 
 private slots:
     void on_actionA_Propos_de_Youtube_dl_triggered();
+    void on_actionMettre_jour_youtube_dl_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -84,6 +86,7 @@ private:
     void getFileNames(QString& msg);
     void changeActualDownloadingVideo(QString& msg);
     void setProgressValue(QString& msg);
+    void correctFileName(int index);
 };
 
 #endif // MAINWINDOW_H

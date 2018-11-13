@@ -318,7 +318,7 @@
      <x>0</x>
      <y>0</y>
      <width>463</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions_avanc_es">
@@ -331,7 +331,7 @@
     <property name="title">
      <string>Aide</string>
     </property>
-    <addaction name="separator"/>
+    <addaction name="actionMettre_jour_youtube_dl"/>
     <addaction name="actionA_Propos_de_Youtube_dl"/>
    </widget>
    <addaction name="menuOptions_avanc_es"/>
@@ -352,6 +352,11 @@
   <action name="actionA_Propos_de_Youtube_dl">
    <property name="text">
     <string>A Propos de Youtube-dl</string>
+   </property>
+  </action>
+  <action name="actionMettre_jour_youtube_dl">
+   <property name="text">
+    <string>Mettre à jour youtube-dl</string>
    </property>
   </action>
  </widget>

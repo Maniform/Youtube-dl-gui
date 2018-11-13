@@ -715,7 +715,7 @@ void MainWindow::on_actionMettre_jour_youtube_dl_triggered()
 #ifdef _WIN32
     update.start(programPath + "youtube-dl",arg);
 #else
-    update.startDetached("youtube-dl",arg);
+    update.start("pip install --upgrade youtube-dl");
 #endif
     dial.exec();
 }

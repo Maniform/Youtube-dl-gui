@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QDate>
 
-#include <QDebug>
+//#include <QDebug>
 
 
 #define MAX_TEXT_SIZE 1000000

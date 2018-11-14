@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QDate>
 
-//#include <QDebug>
+#include <QDebug>
 
 
 #define MAX_TEXT_SIZE 1000000
@@ -15,7 +15,8 @@ MainWindow::MainWindow(QWidget *parent) :
     programPath(QDir::currentPath()+"/"),
     mode(Nothing),
     gettingFileName(false),
-    process(this)
+    process(this),
+    update(this)
 {
     ui->setupUi(this);
 
@@ -71,6 +72,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->logCheckBox, SIGNAL(stateChanged(int)), this, SLOT(logChecked(int)));
     connect(ui->lienLineEdit, SIGNAL(returnPressed()), this, SLOT(startProcess()));
     connect(ui->playlistCheckBox, SIGNAL(stateChanged(int)), this, SLOT(playlistChecked(int)));
+#ifdef _WIN32
+    connect(&update, SIGNAL(finished(int)), this, SLOT(updateFinished()));
+#endif
 
     //Initialisation des objets à désactiver durant le téléchargement
     widgetsToDisableOnRun.append(ui->lienLineEdit);
@@ -704,7 +708,6 @@ void MainWindow::on_actionMettre_jour_youtube_dl_triggered()
     QStringList arg;
     arg.append("-U");
     QProgressDialog dial(this);
-    QProcess update(&dial);
     dial.setLabelText("Mise à jour en cours... (Cette opération peut prendre quelques minutes)");
     dial.setMinimum(0);
     dial.setMaximum(0);
@@ -718,4 +721,23 @@ void MainWindow::on_actionMettre_jour_youtube_dl_triggered()
     update.start("pip install --upgrade youtube-dl");
 #endif
     dial.exec();
+#ifdef _WIN32
+//    if(QDir(programPath).exists("youtube-dl-updater.bat"))
+//        update.startDetached("youtube-dl-updater.bat");
+#endif
 }
+
+#ifdef _WIN32
+void MainWindow::updateFinished()
+{
+    QDir current(programPath);
+    if(current.exists("youtube-dl-updater.bat"))
+        current.remove("youtube-dl-updater.bat");
+    if(current.exists("youtube-dl.new"))
+    {
+        current.remove("youtube-dl");
+        current.rename("youtube-dl.new","youtube-dl");
+    }
+
+}
+#endif

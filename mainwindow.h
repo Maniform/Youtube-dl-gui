@@ -54,6 +54,9 @@ public slots:
     void logChecked(int checked);
 
 private slots:
+#ifdef _WIN32
+    void updateFinished();
+#endif
     void on_actionA_Propos_de_Youtube_dl_triggered();
     void on_actionMettre_jour_youtube_dl_triggered();
 
@@ -71,7 +74,7 @@ private:
     QStringList title;
     QStringList correctedTitle;
 
-    QProcess process;
+    QProcess process, update;
     QStringList arguments;
 
     //Instances nécessaires pour l'affichage de la barre de progression dans l'icône de la barre des tâches
